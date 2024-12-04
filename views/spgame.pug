@@ -1,0 +1,217 @@
+extends layout
+
+block headContent
+	title Player v Agent
+
+block content
+		
+	style.
+		@keyframes shake {
+			0% { transform: translateX(0) }
+			25% { transform: translateX(5px) }
+			50% { transform: translateX(-5px) }
+			75% { transform: translateX(5px) }
+			100% { transform: translateX(0) }
+		}
+
+		.shake {
+			animation: shake 0.5s;
+		}
+		.game-container {
+			display: flex;
+			justify-content: space-around;
+			width: 100%;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		.board-section {
+			text-align: center;
+		}
+		.letter-box {
+			width: 60px;
+			height: 60px;
+			border: 2px solid gray;
+			margin: 2px;
+			font-size: 2rem;
+			font-weight: bold;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			text-transform: uppercase;
+		}
+		.filled-box {
+			border: 2px solid black;
+		}
+		.correct {
+			background-color: #6AAA64;
+			color: white;
+			border-color: #6AAA64;
+		}
+		.present {
+			background-color: #C9B458;
+			color: white;
+			border-color: #C9B458;
+		}
+		.absent {
+			background-color: #787C7E;
+			color: white;
+			border-color: #787C7E;
+		}
+		.keyboard-row {
+			display: flex;
+			justify-content: center;
+			gap: 5px;
+			margin: 5px;
+		}
+		.key-box {
+			min-width: 40px;
+			height: 55px;
+			margin: 1px;
+			border-radius: 4px;
+			font-weight: bold;
+			text-transform: uppercase;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			transition: all 0.1s ease;
+		}
+
+		.key-box:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+
+		.key-box[data-key="ENTER"],
+		.key-box[data-key="BACK"] {
+			min-width: 65px;
+			font-size: 0.9rem;
+		}
+
+		/* Color states for keys */
+		.key-box.correct {
+			background-color: #6AAA64;
+			border-color: #6AAA64;
+			color: white;
+		}
+
+		.key-box.present {
+			background-color: #C9B458;
+			border-color: #C9B458;
+			color: white;
+		}
+
+		.key-box.absent {
+			background-color: #787C7E;
+			border-color: #787C7E;
+			color: white;
+		}
+
+		.modal-content {
+			border-radius: 10px;
+			box-shadow: 0 5px 15px rgba(0,0,0,.5);
+		}
+
+		.modal-header {
+			background-color: #f8f9fa;
+			border-radius: 10px 10px 0 0;
+			color: #212529;  /* Dark text for header */
+		}
+
+		.modal-body {
+			padding: 2rem;
+			font-size: 1.2rem;
+			text-align: center;
+			color: #212529;  /* Dark text for body */
+			background-color: white;  /* Explicit background */
+		}
+
+		.modal-footer {
+			border-top: none;
+			padding: 1rem;
+			background-color: white;  /* Match body background */
+		}
+
+		.modal-title {
+			color: #212529;  /* Ensure title is visible */
+			font-weight: bold;  /* Optional: make title stand out */
+		}
+
+	div.container.mt-5
+		h1.text-center.mb-4  
+		
+		div.game-container
+			div.controls-section.mt-4.text-center
+				div.wallet-section.mb-4
+					button#connectWallet.btn.btn-outline-primary.mb-2 Connect Wallet
+					div#walletBalance.d-none
+						strong.me-2 Balance:
+						span.balance-amount
+						span.ms-2.badge.bg-secondary ALPHA
+				form#competitor-selection.mb-4
+					div.form-group
+						label.h4.mb-3(for="competitor") Choose Your Competitor:
+						select#competitor.form-select.form-select-lg.mb-3(name="competitor", style="width: 300px; margin: 0 auto;")
+							option(value="beginner") Beginner: Minimax
+							option(value="intermediate") Intermediate: Constraints
+							option(value="advanced") Advanced: GPT
+					div.d-flex.justify-content-center.gap-2
+						button#startButton.btn.btn-primary.btn-lg Start Game
+						button#resetButton.btn.btn-primary.btn-lg.ms-2.d-none Play Again
+			//- Player's board
+			div.board-section
+				h2 You
+				div.d-flex.justify-content-center.mb-4#game-board
+					div.d-flex.flex-column
+						- for(let i = 0; i < 6; i++)
+							div.d-flex
+								- for(let j = 0; j < 5; j++)
+									div.letter-box
+				
+				div#keyboard.container.mt-3
+					div.row.justify-content-center.g-1.mb-1
+						- const row1 = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']
+						each letter in row1
+							div.col-auto
+								button.btn.btn-light.key-box(data-key=letter)= letter
+
+					div.row.justify-content-center.g-1.mb-1
+						- const row2 = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']
+						each letter in row2
+							div.col-auto
+								button.btn.btn-light.key-box(data-key=letter)= letter
+
+					div.row.justify-content-center.g-1
+						div.col-auto
+							button.btn.btn-light.key-box(data-key="ENTER") Enter
+						- const row3 = ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+						each letter in row3
+							div.col-auto
+								button.btn.btn-light.key-box(data-key=letter)= letter
+						div.col-auto
+							button.btn.btn-light.key-box(data-key="BACK")
+								i.bi.bi-backspace-fill
+
+			//- AI's board
+			div.board-section
+				h2 Agent
+				div.d-flex.justify-content-center.mb-4#ai-board
+					div.d-flex.flex-column
+						- for(let i = 0; i < 6; i++)
+							div.d-flex
+								- for(let j = 0; j < 5; j++)
+									div.letter-box
+
+	div#messageModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
+		div.modal-dialog.modal-dialog-centered(role='document')
+			div.modal-content
+				div.modal-header
+					h5#messageModalTitle.modal-title Game Over
+					button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+				div#messageModalBody.modal-body
+					p
+				div.modal-footer
+					button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+	+sharedScriptTags
+
+	script(src="/js/playervmodel-sock.js")
+	

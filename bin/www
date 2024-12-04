@@ -1,0 +1,37 @@
+"use strict";
+
+const debug = require('debug')('www');
+const app = require('../app');  // Import the express app from app.js
+
+const v8 = require('v8');
+const maxOldSpaceSize = parseInt(process.env.BTCEXP_OLD_SPACE_MAX_SIZE, 10) || 1024;
+v8.setFlagsFromString(`--max_old_space_size=${maxOldSpaceSize}`);
+debug(`Set max_old_space_size to ${maxOldSpaceSize} MB`);
+
+// Set port and host
+app.set('port', process.env.PORT || process.env.BTCEXP_PORT || 3002);
+app.set('host', process.env.BTCEXP_HOST || '127.0.0.1');
+
+// Create HTTP server and pass expressApp to it
+const http = require('http');
+const server = http.createServer(app);
+
+
+// Initialize WebSocket after server creation but before listen
+if (app.initializeWebSocket) {
+    app.initializeWebSocket(server);
+}
+
+// Start the server
+server.listen(app.get('port'), app.get('host'), () => {
+    debug('Express server starting on ' + server.address().address + ':' + server.address().port);
+
+    // Ensure onStartup is called (async)
+    if (app.onStartup) {
+        (async function() {
+            await app.onStartup();
+        })();
+    }
+
+    debug('Express server startup complete.');
+});

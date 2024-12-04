@@ -1,0 +1,290 @@
+extends layout
+
+block headContent
+	title Combat Wordle 
+
+block content
+		
+	style.
+		@keyframes shake {
+			0% { transform: translateX(0) }
+			25% { transform: translateX(5px) }
+			50% { transform: translateX(-5px) }
+			75% { transform: translateX(5px) }
+			100% { transform: translateX(0) }
+		}
+
+		.shake {
+			animation: shake 0.5s;
+		}
+		.game-container {
+			display: flex;
+			justify-content: space-around;
+			width: 100%;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		.board-section {
+			text-align: center;
+		}
+		.letter-box {
+			width: 60px;
+			height: 60px;
+			border: 2px solid gray;
+			margin: 2px;
+			font-size: 2rem;
+			font-weight: bold;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			text-transform: uppercase;
+		}
+		.filled-box {
+			border: 2px solid black;
+		}
+		.correct {
+			background-color: #6AAA64;
+			color: white;
+			border-color: #6AAA64;
+		}
+		.present {
+			background-color: #C9B458;
+			color: white;
+			border-color: #C9B458;
+		}
+		.absent {
+			background-color: #787C7E;
+			color: white;
+			border-color: #787C7E;
+		}
+		.keyboard-row {
+			display: flex;
+			justify-content: center;
+			gap: 5px;
+			margin: 5px;
+		}
+		.key-box {
+			min-width: 40px;
+			height: 55px;
+			margin: 1px;
+			border-radius: 4px;
+			font-weight: bold;
+			text-transform: uppercase;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			transition: all 0.1s ease;
+		}
+
+		.key-box:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+
+		.key-box[data-key="ENTER"],
+		.key-box[data-key="BACK"] {
+			min-width: 65px;
+			font-size: 0.9rem;
+		}
+
+		/* Color states for keys */
+		.key-box.correct {
+			background-color: #6AAA64;
+			border-color: #6AAA64;
+			color: white;
+		}
+
+		.key-box.present {
+			background-color: #C9B458;
+			border-color: #C9B458;
+			color: white;
+		}
+
+		.key-box.absent {
+			background-color: #787C7E;
+			border-color: #787C7E;
+			color: white;
+		}
+
+		.modal-content {
+			border-radius: 10px;
+			box-shadow: 0 5px 15px rgba(0,0,0,.5);
+		}
+
+		.modal-header {
+			background-color: #f8f9fa;
+			border-radius: 10px 10px 0 0;
+			color: #212529;  /* Dark text for header */
+		}
+
+		.modal-body {
+			padding: 2rem;
+			font-size: 1.2rem;
+			text-align: center;
+			color: #212529;  /* Dark text for body */
+			background-color: white;  /* Explicit background */
+		}
+
+		.modal-footer {
+			border-top: none;
+			padding: 1rem;
+			background-color: white;  /* Match body background */
+		}
+
+		.modal-title {
+			color: #212529;  /* Ensure title is visible */
+			font-weight: bold;  /* Optional: make title stand out */
+		}
+		.green-check {
+			color: green;
+			font-weight: bold;
+		}
+		.red-cross {
+			color: red;
+			font-weight: bold;
+		}
+		#timer {
+			font-size: 3rem;
+			font-weight: bold;
+			transition: color 0.3s ease;
+			text-align: center;
+			margin-bottom: 1rem;
+		}
+
+		#timer.warning {
+			color: #f0ad4e;
+		}
+
+		#timer.danger {
+			color: #d9534f;
+			animation: pulse 1s infinite;
+		}
+
+		@keyframes pulse {
+			0% { transform: scale(1); }
+			50% { transform: scale(1.05); }
+			100% { transform: scale(1); }
+		}
+		
+		.card-header {
+			cursor: pointer;
+		}
+
+		.bi-chevron-down {
+			transition: transform 0.3s ease;
+		}
+
+		.card-header:hover {
+			background-color: #0056b3;
+		}
+
+	div.container.mt-5
+		h1.text-center.mb-4  Combat Wordle
+		+dismissableInfoAlert("speedWorldeRulesDismissed", "Rules of the Game...")
+			h6.mb-2 Rules of the Game
+			ul.mb-0.ms-n3
+				li A Contest is 5 games of Wordle with a time limit of 60 seconds per game
+				li If you fail to solve the game in 60 seconds a penalty of 30 seconds is added.
+				li Score is calculated based on total time taken to solve all 5 games
+				li The player with the lowest score wins. 
+				li Download Unicity Proof to verify agent state history (no cheating)
+
+
+		div.game-container
+			div.controls-section.mt-4.text-center
+				div#timer.mb-3 60s
+				form#competitor-selection.mb-4
+					div.d-flex.justify-content-center.gap-2
+						button#startButton.btn.btn-primary.btn-lg Start Contest
+				
+			
+			div.board-section
+				h2 You
+				div.d-flex.justify-content-center.mb-4#game-board
+					div.d-flex.flex-column
+						- for(let i = 0; i < 6; i++)
+							div.d-flex
+								- for(let j = 0; j < 5; j++)
+									div.letter-box
+				
+				div#keyboard.container.mt-3
+					div.row.justify-content-center.g-1.mb-1
+						- const row1 = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']
+						each letter in row1
+							div.col-auto
+								button.btn.btn-light.key-box(data-key=letter)= letter
+
+					div.row.justify-content-center.g-1.mb-1
+						- const row2 = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']
+						each letter in row2
+							div.col-auto
+								button.btn.btn-light.key-box(data-key=letter)= letter
+
+					div.row.justify-content-center.g-1
+						div.col-auto
+							button.btn.btn-light.key-box(data-key="ENTER") Enter
+						- const row3 = ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+						each letter in row3
+							div.col-auto
+								button.btn.btn-light.key-box(data-key=letter)= letter
+						div.col-auto
+							button.btn.btn-light.key-box(data-key="BACK")
+								i.bi.bi-backspace-fill
+			div.contest-section.mt-4
+				div.card
+					div.card-header.bg-primary.text-white
+						h3.mb-0 Contest Scores
+					div.card-body
+						table.table.table-hover
+							thead
+								tr
+									th #
+									th Word
+									th Time
+									th Guesses
+									th Result
+							tbody#contestScores
+								- for(let i = 0; i < 5; i++)
+									tr
+										td= (i + 1)
+										td -
+										td -
+										td -
+										td -
+							tfoot.table-light
+								tr.fw-bold
+									td(colspan="2") Total
+									td#totalTime 0s
+									td#totalGuesses 0
+									td#finalResult
+
+				div.leaderboard-section.mt-4
+					div.card
+						div.card-header.bg-primary.text-white
+							h3.mb-0 Leaderboard
+						div.card-body
+							table.table.table-hover
+								thead
+									tr
+										th Rank
+										th Player
+										th Time
+										th Date
+								tbody#leaderboardBody
+
+	div#messageModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
+		div.modal-dialog.modal-dialog-centered(role='document')
+			div.modal-content
+				div.modal-header
+					h5#messageModalTitle.modal-title Game Over
+					button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+				div#messageModalBody.modal-body
+					p
+				div.modal-footer
+					button#modalSubmitBtn.btn.btn-primary.d-none(type='button' onclick='submitPlayerName()') Submit Score
+					button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+	+sharedScriptTags
+
+
+	script(src="/js/speedwordlecontest-sock.js")
+	

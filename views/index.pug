@@ -1,0 +1,98 @@
+extends layout
+
+block headContent
+	title Alpha Explorer
+	
+block content
+	style.
+		.list-group-item {
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+
+		.list-group-item:hover {
+			background-color: #f8f9fa;
+		}
+
+		.list-group-item.active {
+			background-color: #0d6efd;
+			color: white;
+			border-color: #0d6efd;
+		}
+
+		.list-group-item.active p {
+			color: rgba(255, 255, 255, 0.8) !important;
+		}
+
+	- var tzDiff = -parseFloat(browserTzOffset);
+	if (userTzOffset != "unset")
+		- tzDiff = parseFloat(userTzOffset);
+
+	- var tzMoment = moment.utc(new Date()).add(tzDiff, "hours");
+	- var tzDay = tzMoment.format("MM-DD");
+
+
+	if (getblockchaininfo == null)
+		div.alert.alert-danger
+			h5.mb-3 Unable to get basic blockchain data
+			ul
+				li
+					p
+						b If you just started your node, it may still be initializing.
+						div At startup, alphad verifies its block index before making itself available to serve data. The amount of time the verification process takes depends largely on the speed of the machine alphad is running on. If you're running on low powered, inexpensive hardware, don't be surprised if this process takes a long time.
+				li
+					p
+						b If you believe your alphad node is already initialized...
+						div Check your RPC connection info and/or check this application's error log for possible hints about the cause of this issue.
+	else	
+		if (getblockchaininfo.initialblockdownload && !["regtest", "signet"].includes(global.activeBlockchain))
+			div.alert.alert-warning.shadow-sm.border.mb-3
+				div.fw-bold.mb-1 Initial Block Download (IBD) - In Progress...
+
+				div.mb-1 Your node is currently downloading and verifying blockchain data. Until the process is finished, some features of this tool will be unusable and/or unreliable.
+
+				span.fw-bold Progress: 
+				span #{new Decimal(getblockchaininfo.verificationprogress).times(100).toDP(3)}%
+
+
+	div.container.mt-5
+		div.row.justify-content-center
+			div.col-md-6
+				div.card.shadow
+					div.card-header.bg-primary.text-white.text-center
+						h2.mb-0 Wordle Games
+
+					div.card-body
+						// Name input
+						div.mb-4
+							label.form-label(for="playerName") Player Name
+							input#playerName.form-control.form-control-lg(type="text" placeholder="Enter a name")
+						
+						// Game selection
+						div.mb-4
+							label.form-label Game Mode
+							div.list-group
+								button#playerVsModel.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center
+									div
+										h5.mb-1 Player vs Model
+										p.mb-1.text-muted Beat the AI at Wordle
+									input(type="radio" name="gameMode" value="playerVsModel")
+								
+								button#modelVsModel.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center
+									div
+										h5.mb-1 Model vs Model
+										p.mb-1.text-muted Watch AI play Wordle
+									input(type="radio" name="gameMode" value="modelVsModel")
+								
+								button#speedWordle.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center
+									div
+										h5.mb-1 Speed Wordle
+										p.mb-1.text-muted Race against time
+									input(type="radio" name="gameMode" value="speedWordle")
+						
+						// Start button
+						button#startGame.btn.btn-primary.btn-lg.w-100.disabled Start Game
+	+sharedScriptTags
+	script(src="/js/index.js")
+	
+		
